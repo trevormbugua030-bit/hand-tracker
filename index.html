@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111512" />
+    <meta name="description" content="A private, real-time hand tracking studio." />
+    <title>Hand Signal · Hand tracking studio</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Hand Signal home">
+          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 12V6.8a1.5 1.5 0 0 1 3 0v4.1-6a1.5 1.5 0 0 1 3 0v6.1-4.2a1.5 1.5 0 0 1 3 0v5.1-2.2a1.5 1.5 0 0 1 3 0v5.1c0 4.1-2.5 6.2-6.2 6.2h-1.3c-2 0-3.5-.8-4.8-2.4L4.5 15a1.6 1.6 0 0 1 2.5-2l2.1 2.1" /></svg></span>
+          <span>Hand Signal</span>
+        </a>
+        <div class="privacy-status"><span class="status-dot"></span><span>Processing on this device</span></div>
+        <button class="icon-button" id="fullscreenBtn" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3" /></svg>
+        </button>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-column" aria-labelledby="page-title">
+          <div class="section-heading">
+            <div><h1 id="page-title">KSL fingerspelling</h1><p>Hold a static letter steadily in view. This experimental landmark reader recognizes only some letters; J and Z need motion.</p></div>
+          </div>
+
+          <div class="viewport-frame" id="viewportFrame" aria-label="Live camera preview">
+            <video id="camera" autoplay playsinline muted></video>
+            <canvas id="overlay" aria-label="Hand landmark overlay"></canvas>
+            <div class="gesture-overlay" id="gestureOverlay" aria-live="polite" aria-label="Estimated KSL letters"></div>
+            <div class="object-layer" id="objectLayer" aria-label="Hand-tracked virtual objects">
+              <div class="virtual-object object-ball" data-x="0.72" data-y="0.5" data-scale="1" aria-label="Movable translucent virtual ball">
+                <div class="ball-sphere" aria-hidden="true"><span class="ball-gloss"></span><span class="ball-reflection"></span></div>
+                <button class="resize-handle" aria-label="Resize ball"></button>
+              </div>
+              <div class="hand-cursor" id="handCursor" aria-hidden="true"><span></span></div>
+            </div>
+            <div class="view-topline">
+              <span class="camera-state"><i class="record-dot"></i><span id="cameraStatus">Standby</span></span>
+              <span class="model-state" id="modelStatus">Model ready</span>
+            </div>
+            <div class="empty-state" id="emptyState">
+              <div class="camera-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13.5" r="3.5"/></svg></div>
+              <p class="empty-title">Your camera preview</p>
+              <p class="empty-copy">Start the camera to see your hand landmarks in real time.</p>
+              <button class="primary-button" id="startBtn"><span class="button-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 6 10 6-10 6z"/></svg></span>Start camera</button>
+            </div>
+            <div class="toast" id="toast" role="status"></div>
+            <div class="view-bottomline"><span id="resolution">— × —</span><span>MediaPipe Hand Landmarker</span></div>
+          </div>
+
+          <div class="status-strip" aria-label="Tracking metrics">
+            <div class="status-item"><span class="status-label">Hands</span><strong id="handCount">00</strong></div>
+            <div class="status-item"><span class="status-label">Frame rate</span><strong><span id="fpsValue">—</span><small> fps</small></strong></div>
+            <div class="status-item"><span class="status-label">KSL letter</span><strong class="gesture-value" id="gestureValue">—</strong></div>
+            <div class="status-item confidence-item"><span class="status-label">Handedness confidence</span><div class="confidence-line"><span id="confidenceFill"></span></div><b id="confidenceValue">—</b></div>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="Tracking controls">
+          <div class="panel-header"><h2>Controls</h2><span class="panel-caption">Adjust your view</span></div>
+
+          <section class="control-section">
+            <h3 class="control-heading">Sign recognition</h3>
+            <label class="toggle-row"><span><b>KSL letters</b><small>Show static letter estimates</small></span><input type="checkbox" id="kslRecognitionToggle" aria-controls="gestureOverlay" checked /><i class="switch" aria-hidden="true"></i></label>
+          </section>
+
+          <section class="control-section">
+            <h3 class="control-heading">Landmark display</h3>
+            <label class="toggle-row"><span><b>Skeleton</b><small>Finger and palm connections</small></span><input type="checkbox" id="skeletonToggle" checked /><i class="switch" aria-hidden="true"></i></label>
+            <label class="toggle-row"><span><b>Joint markers</b><small>Show all 21 points</small></span><input type="checkbox" id="jointsToggle" checked /><i class="switch" aria-hidden="true"></i></label>
+            <label class="toggle-row"><span><b>Fingertip names</b><small>Label each finger</small></span><input type="checkbox" id="labelsToggle" checked /><i class="switch" aria-hidden="true"></i></label>
+            <label class="toggle-row"><span><b>Landmark IDs</b><small>Show point numbers</small></span><input type="checkbox" id="idsToggle" /><i class="switch" aria-hidden="true"></i></label>
+          </section>
+
+          <section class="control-section sliders-section">
+            <h3 class="control-heading">Line style</h3>
+            <div class="slider-row"><div><label for="thicknessSlider">Thickness</label><output id="thicknessOutput">2.4</output></div><input type="range" id="thicknessSlider" min="1" max="6" step="0.2" value="2.4" /></div>
+            <div class="slider-row"><div><label for="glowSlider">Glow</label><output id="glowOutput">32%</output></div><input type="range" id="glowSlider" min="0" max="100" step="1" value="32" /></div>
+          </section>
+
+          <section class="control-section object-controls">
+            <h3 class="control-heading">Virtual ball</h3>
+            <label class="toggle-row"><span><b>Show ball</b><small>Move it with a pinch or grasp</small></span><input type="checkbox" id="objectToggle" checked /><i class="switch" aria-hidden="true"></i></label>
+            <button class="text-button reset-objects" id="resetObjectsBtn">Reset ball position</button>
+          </section>
+
+          <section class="control-section hand-section">
+            <div class="hand-section-heading"><h3 class="control-heading">Detected hands</h3><span class="hand-count-inline" id="handCountInline">0</span></div>
+            <div class="hand-list" id="handList"><span class="no-hands">Hands will appear here when detected.</span></div>
+          </section>
+
+          <details class="landmark-card">
+            <summary><span><b>Landmark guide</b><small>Numbering for all 21 points</small></span><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 6 4.5 4 4.5-4" /></svg></summary>
+            <div class="landmark-list"><span><i>0</i> Wrist</span><span><i>1–4</i> Thumb</span><span><i>5–8</i> Index</span><span><i>9–12</i> Middle</span><span><i>13–16</i> Ring</span><span><i>17–20</i> Pinky</span></div>
+          </details>
+
+          <div class="control-actions">
+            <button class="secondary-button stop-button" id="stopBtn" disabled><span class="stop-icon" aria-hidden="true"></span>Stop camera</button>
+            <button class="secondary-button reset-button" id="resetBtn" title="Reset visualization settings" aria-label="Reset visualization settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11a8 8 0 1 1 2 5.3M4 5v6h6" /></svg></button>
+            <button class="secondary-button screenshot-button" id="screenshotBtn" title="Save a screenshot" aria-label="Save a screenshot" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3A1.5 1.5 0 0 1 21.5 9v9a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z"/><circle cx="12" cy="13.5" r="3.5"/></svg></button>
+          </div>
+        </aside>
+      </main>
+      <footer class="footer"><span>Hand Signal</span><span>Camera frames stay on this device</span></footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
