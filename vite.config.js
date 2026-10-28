@@ -8,6 +8,7 @@ const wasmDirectory = path.join(root, 'node_modules/@mediapipe/tasks-vision/wasm
 const publicPrefix = '/mediapipe/wasm/';
 
 export default defineConfig({
+  base: '/hand-tracker/',
   plugins: [{
     name: 'serve-mediapipe-wasm-locally',
     configureServer(server) {
