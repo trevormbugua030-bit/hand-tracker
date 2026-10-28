@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const wasmDirectory = path.join(root, 'node_modules/@mediapipe/tasks-vision/wasm');
-const publicPrefix = '/mediapipe/wasm/';
+const publicPrefixes = ['/mediapipe/wasm/', '/hand-tracker/mediapipe/wasm/'];
 
 export default defineConfig({
   base: '/hand-tracker/',
@@ -14,7 +14,8 @@ export default defineConfig({
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
         const url = request.url || '';
-        if (!url.startsWith(publicPrefix)) return next();
+        const publicPrefix = publicPrefixes.find((prefix) => url.startsWith(prefix));
+        if (!publicPrefix) return next();
         const filename = path.basename(decodeURIComponent(url.slice(publicPrefix.length).split('?')[0]));
         const filePath = path.join(wasmDirectory, filename);
         if (!existsSync(filePath)) return next();

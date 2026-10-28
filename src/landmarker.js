@@ -1,6 +1,8 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
 
-const WASM_ROOT = '/mediapipe/wasm';
+// Keep MediaPipe's runtime assets under Vite's configured base path. This is
+// important on GitHub Pages, where the app is hosted below /hand-tracker/.
+const WASM_ROOT = `${import.meta.env.BASE_URL}mediapipe/wasm`;
 const MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 
 function errorDetails(value) {
